@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
                 items.remove(position);
                 //Notify the adapter
                 itemsAdapter.notifyItemRemoved(position);
-                Toast.makeText(getApplicationContext(),"Item Removed!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(),"Item Removed TEST!", Toast.LENGTH_SHORT).show();
                 saveItems();
             }
         };
