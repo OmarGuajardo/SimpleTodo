@@ -20,7 +20,7 @@ The following **stretch** features are implemented:
 
 The following **additional** features are implemented:
 
-* [x] List anything else that you can get done to improve the app functionality!
+*  Please see my other branch [Pop_Up_Box](https://github.com/OmarGuajardo/SimpleTodo/tree/pop_up_box#project-101---simpletodo-with-popupbox) for additional features
 
 ## Video Walkthrough
 
