@@ -7,13 +7,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
-//import android.os.FileUtils;
 import org.apache.commons.io.FileUtils;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Toast;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,16 +20,16 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements Dialog.DialogListener{
 
     public static final String KEY_ITEM_TEXT = "item_text";
     public static final String KEY_ITEM_POSITION = "item_position";
     public static final int EDIT_TEXT_CODE = 20;
-    //place to declare variables
-    List<String> items;
 
-    Button btnAdd;
-    EditText etItem;
+
+    //Declaring global variables
+    List<String> items;
+    FloatingActionButton floatingActionBtn;
     RecyclerView rvItems;
     ItemsAdapter itemsAdapter;
 
@@ -39,13 +38,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        btnAdd = findViewById(R.id.btnAdd);
-        etItem = findViewById(R.id.etItem);
+        floatingActionBtn = findViewById(R.id.floatingActionButton);
         rvItems = findViewById(R.id.rvItems);
 
-
-
-
+        //calling 'loadItems' at the beginning of the rendering so that 'items'
+        //can be populated and used to populate the ListView
         loadItems();
 
         ItemsAdapter.OnLongClickListener onLongClickListener = new ItemsAdapter.OnLongClickListener(){
@@ -55,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
                 items.remove(position);
                 //Notify the adapter
                 itemsAdapter.notifyItemRemoved(position);
-                Toast.makeText(getApplicationContext(),"Item Removed TEST!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(),"Item Removed Successfully!", Toast.LENGTH_SHORT).show();
                 saveItems();
             }
         };
@@ -79,23 +76,20 @@ public class MainActivity extends AppCompatActivity {
            }
        };
 
+        //
         itemsAdapter = new ItemsAdapter(items,onLongClickListener,onClickListener);
         rvItems.setAdapter(itemsAdapter);
         rvItems.setLayoutManager(new LinearLayoutManager(this));
 
-        btnAdd.setOnClickListener(new View.OnClickListener() {
+
+        //When the FAB is clicked it will call 'openDialog' which will PopUp the
+        // 'Add a new Tod0' screen
+        floatingActionBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String newToDo = etItem.getText().toString();
+                //Open Dialog
+                openDialog();
 
-                //Add Item to Model
-                items.add(newToDo);
-
-                //Notify the adapter that an item has been inserted
-                itemsAdapter.notifyItemInserted(items.size() - 1);
-                etItem.setText("");
-                Toast.makeText(getApplicationContext(),"Item Added!", Toast.LENGTH_SHORT).show();
-                saveItems();
             }
         });
     }
@@ -103,8 +97,8 @@ public class MainActivity extends AppCompatActivity {
     //handle the result of the Edit Activity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        Log.i("MainAcitivity","This is the requestCode " + requestCode + " and this is the resultCode " + resultCode);
-        Log.i("MainAcitivity","This is what it should be requestCode " + RESULT_OK + " and this is the resultCode " + EDIT_TEXT_CODE);
+        Log.i("MainActivity","This is the requestCode " + requestCode + " and this is the resultCode " + resultCode);
+        Log.i("MainActivity","This is what it should be requestCode " + RESULT_OK + " and this is the resultCode " + EDIT_TEXT_CODE);
         if(resultCode == RESULT_OK && requestCode == EDIT_TEXT_CODE){
             //Retrieve the updated text val
             String itemText = data.getStringExtra(KEY_ITEM_TEXT);
@@ -127,15 +121,17 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    //place to define methods
+    //BELOW IS A PLACE WHERE METHODS ARE DEFINED
+
+    //This method will return the file data.txt
     private File getDataFile(){
         return new File(getFilesDir(),"data.txt");
     }
 
-    //This function will load items by reading every line of data.txt file
+    //This method will load items by reading every line of data.txt file
     private void loadItems(){
+        //Note that readLines is part of the Apache Commons library that returns every line of the .txt file as an Array of Strings
         try{
-//            items = new ArrayList<String>(FileUtils.readLines(getDataFile(), Charset.defaultCharset()));
             items = new ArrayList<>(FileUtils.readLines(getDataFile(), Charset.defaultCharset()));
         }
         catch (IOException e){
@@ -146,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    //This function will saves items by writing them into data file
+    //This method will saves items by writing them into data file
     private void saveItems(){
         try{
             FileUtils.writeLines(getDataFile(),items);
@@ -155,5 +151,26 @@ public class MainActivity extends AppCompatActivity {
             Log.e("MainActivity","Error reading items",e);
         }
 
+    }
+
+    //This method will create a new instance of the Class Dialog
+    //When the class is constructed it will generated a new View that will be a PopUp Dialog
+    public void openDialog(){
+            Dialog newDialog = new Dialog();
+            newDialog.show(getSupportFragmentManager(),"Dialog");
+    }
+
+    //This method will receive information from the Dialog and pass it back up
+    //to MainActivity were then the 'newItem' can be inserted into the 'items' array
+    @Override
+    public void applyText(String newItem) {
+
+        //add new Item to the List
+        items.add(newItem);
+
+        //Notify the adapter that an item has been inserted
+        itemsAdapter.notifyItemInserted(items.size() - 1);
+        Toast.makeText(getApplicationContext(),"Item Added!", Toast.LENGTH_SHORT).show();
+        saveItems();
     }
 }
