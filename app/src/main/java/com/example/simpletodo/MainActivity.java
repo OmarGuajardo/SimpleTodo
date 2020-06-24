@@ -1,5 +1,6 @@
 package com.example.simpletodo;
 
+import androidx.annotation.Nullable;
 import  androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -59,6 +60,8 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
+
+
        ItemsAdapter.OnClickListener onClickListener = new ItemsAdapter.OnClickListener() {
            @Override
            public void onItemClicked(int position) {
@@ -95,6 +98,33 @@ public class MainActivity extends AppCompatActivity {
                 saveItems();
             }
         });
+    }
+
+    //handle the result of the Edit Activity
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        Log.i("MainAcitivity","This is the requestCode " + requestCode + " and this is the resultCode " + resultCode);
+        Log.i("MainAcitivity","This is what it should be requestCode " + RESULT_OK + " and this is the resultCode " + EDIT_TEXT_CODE);
+        if(resultCode == RESULT_OK && requestCode == EDIT_TEXT_CODE){
+            //Retrieve the updated text val
+            String itemText = data.getStringExtra(KEY_ITEM_TEXT);
+            //Extract original position of the edited item
+            int itemPosition = data.getExtras().getInt(KEY_ITEM_POSITION);
+
+
+
+            //update the model at the right position
+            items.set(itemPosition,itemText);
+
+            //notify the adapter
+            itemsAdapter.notifyItemChanged(itemPosition);
+            //save the changes
+            saveItems();
+            Toast.makeText(getApplicationContext(),"Item updated successuflly!", Toast.LENGTH_SHORT).show();
+        }
+        else{
+            Log.w("MainActivity","Unknown call to onActivityResult");
+        }
     }
 
     //place to define methods
